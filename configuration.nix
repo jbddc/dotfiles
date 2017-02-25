@@ -141,29 +141,6 @@ in {
     };
   };
 
-  #services = {
-  #  xserver = {
-  #    enable = true;
-  #    videoDrivers = [ "nvidia" ];
-
-  #    desktopManager = {
-  #      default = "kde4";
-  #      kde4 = {
-  #        enable = true;
-  #      };
-  #    };
-
-
-
-  #    displayManager = {
-  #      kdm.enable = true;
-  #    };
-
-  #    autorun = true;
-
-  #  };
-  #};
-
   programs.zsh = {
     enable = true;
     enableCompletion = true;
@@ -181,7 +158,8 @@ in {
       antigen bundle zsh-users/zsh-syntax-highlighting
       # Load the theme.
       #antigen theme https://github.com/caiogondim/bullet-train-oh-my-zsh-theme bullet-train
-      antigen theme https://github.com/vichargrave/mau mau
+      antigen theme https://github.com/judgedim/oh-my-zsh-judgedim-theme judgedim
+      #antigen theme https://github.com/vichargrave/mau mau
       # Tell antigen that you're done.
       antigen apply     
    '';
