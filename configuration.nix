@@ -1,6 +1,12 @@
 { config, pkgs, ... }:
 
-{
+let zsh = "/run/current-system/sw/bin/zsh";
+    antigen = pkgs.fetchgit {
+      url = "https://github.com/zsh-users/antigen";
+      rev = "1359b9966689e5afb666c2c31f5ca177006ce710";
+      sha256 = "13b4a6239p5xsrqmg43bw3z5y7nz25awzclgyb697pqpf139drc9";
+    };
+in {
   imports =
     [ # Include the results of the hardware scan.
       ./hardware-configuration.nix
@@ -29,12 +35,13 @@
     kvm qemu libvirt
     openssl
 
+    htop
     wget sudo gnumake
     gcc
+    nodejs
     vim neovim
     vimPlugins.spacevim
     vimPlugins.vundle
-    oh-my-zsh
     iosevka
     
    haskellPackages.stack
@@ -157,15 +164,26 @@
   #  };
   #};
 
-  #oh-my-zsh
-  programs.zsh.enable = true;
-  programs.zsh.interactiveShellInit = ''
-    export ZSH=${pkgs.oh-my-zsh}/share/oh-my-zsh
-    ZSH_THEME="3den"
-    plugins=(git)
-    
-    source $ZSH/oh-my-zsh.sh
-  '';
-  programs.zsh.promptInit = "";
-
+  programs.zsh = {
+    enable = true;
+    enableCompletion = true;
+    interactiveShellInit = ''
+      source ${antigen}/antigen.zsh
+      # Load the oh-my-zsh's library.
+      antigen use oh-my-zsh
+      # Bundles from the default repo (robbyrussell's oh-my-zsh).
+      antigen bundle git
+      antigen bundle git-extras
+      antigen bundle cabal
+      antigen bundle sbt
+      antigen bundle scala
+      # Syntax highlighting bundle.
+      antigen bundle zsh-users/zsh-syntax-highlighting
+      # Load the theme.
+      #antigen theme https://github.com/caiogondim/bullet-train-oh-my-zsh-theme bullet-train
+      antigen theme https://github.com/vichargrave/mau mau
+      # Tell antigen that you're done.
+      antigen apply     
+   '';
+  };
 }
