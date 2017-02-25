@@ -1,7 +1,3 @@
-# Edit this configuration file to define what should be installed on
-# your system.  Help is available in the configuration.nix(5) man page
-# and in the NixOS manual (accessible by running ‘nixos-help’).
-
 { config, pkgs, ... }:
 
 {
@@ -14,8 +10,7 @@
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
-  networking.hostName = "Namek"; # Define your hostname.
-  # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
+  networking.hostName = "Namek"; 
 
   # Select internationalisation properties.
   i18n = {
@@ -30,44 +25,39 @@
   # List packages installed in system profile. To search by name, run:
   # $ nix-env -qaP | grep wget
   environment.systemPackages = with pkgs; [
-    
+
+    kvm qemu libvirt
+    openssl
+
     wget sudo gnumake
     gcc
-    vim
+    vim neovim
+    vimPlugins.spacevim
     vimPlugins.vundle
     oh-my-zsh
+    iosevka
     
    haskellPackages.stack
-    haskellPackages.xmobar
     haskellPackages.xmonad-contrib
     haskellPackages.xmonad-extras
     haskellPackages.xmonad
 
-    dmenu
     xscreensaver
     xclip
     
-
   ];
 
   # List services that you want to enable:
 
-  # Enable the OpenSSH daemon.
-  # services.openssh.enable = true;
+  hardware = {
+    pulseaudio.enable=true;
+    pulseaudio.support32Bit = true;
+  };
+
 
   # Enable CUPS to print documents.
   # services.printing.enable = true;
 
-  # Enable the X11 windowing system.
-  #services.xserver.enable = true;
-  #services.xserver.layout = "us";
-  #services.xserver.xkbOptions = "eurosign:e";
-
-  # Enable the KDE Desktop Environment.
-  # services.xserver.displayManager.kdm.enable = true;
-  # services.xserver.desktopManager.kde4.enable = true;
-
-  # Define a user account. Don't forget to set a password with ‘passwd’.
 
   # The NixOS release to be compatible with for stateful data such as databases.
   system.stateVersion = "16.09";
@@ -80,6 +70,21 @@
     }
   ];
 
+  virtualisation.libvirtd.enable = true;
+  # GPU PASSTHROUGH NEEDED STUFF
+  #boot.kernelModules = [
+  # "vfio"
+  # "vfio_pci"
+  # "vfio_iommu_type1"
+  #];
+
+  #boot.kernelParams = [
+  #  "intel_iommu=on"
+  #  "vfio_iommu_type1.allow_unsafe_interrupts=1"
+  #  "kvm.allow_unsafe_assigned_interrupts=1"
+  #  "kvm.ignore_msrs=1"
+  #];
+
   boot.loader.grub.device = "/dev/sdb";
 
   #user
@@ -89,6 +94,7 @@
     extraGroups = [
      "wheel" "disk" "audio" "video"
      "networkmanager" "systemd-journal"
+     "libvirtd"
     ];
     createHome = true;
     uid = 1000;
@@ -101,38 +107,65 @@
   hardware.opengl.driSupport32Bit = true;
 
   #xmonad and slim and nvidia drivers
-  services.xserver = {
-    enable = true;
-    videoDrivers = [ "nvidia" ];
-    windowManager.xmonad = {
+  services = {
+    openssh.enable = true;
+
+    xserver = {
       enable = true;
-      enableContribAndExtras = true;
-      extraPackages = haskellPackages: [
-        haskellPackages.xmonad-contrib
-        haskellPackages.xmonad-extras
-        haskellPackages.xmonad
-      ];
-    };
-    windowManager.default= "xmonad";
-    displayManager = {
-      slim = {
-        enable = true;
-        defaultUser = "bernas";
+      layout = "us";
+      videoDrivers = [ "nvidia" ];
+
+      desktopManager = {
+	kde4.enable = true;
+        default = "kde4";
       };
+      
+      windowManager = {
+	xmonad.enable = true;
+	xmonad.enableContribAndExtras = true;
+      };
+
+      displayManager = {
+        lightdm.enable = true;
+      };
+
+      autorun = true;
+
     };
   };
+
+  #services = {
+  #  xserver = {
+  #    enable = true;
+  #    videoDrivers = [ "nvidia" ];
+
+  #    desktopManager = {
+  #      default = "kde4";
+  #      kde4 = {
+  #        enable = true;
+  #      };
+  #    };
+
+
+
+  #    displayManager = {
+  #      kdm.enable = true;
+  #    };
+
+  #    autorun = true;
+
+  #  };
+  #};
 
   #oh-my-zsh
   programs.zsh.enable = true;
   programs.zsh.interactiveShellInit = ''
     export ZSH=${pkgs.oh-my-zsh}/share/oh-my-zsh
-    ZSH_THEME="agnoster"
+    ZSH_THEME="3den"
     plugins=(git)
     
     source $ZSH/oh-my-zsh.sh
   '';
   programs.zsh.promptInit = "";
-
-
 
 }
