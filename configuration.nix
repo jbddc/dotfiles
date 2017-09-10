@@ -16,7 +16,6 @@ in {
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
-  networking.hostName = "Namek"; 
 
   # Select internationalisation properties.
   i18n = {
@@ -28,47 +27,62 @@ in {
   # Set your time zone.
   time.timeZone = "Europe/Lisbon";
 
+  nix.extraOptions = ''
+    binary-caches-parallel-connections = 6
+    connect-timeout = 5
+  '';
+
   # List packages installed in system profile. To search by name, run:
   # $ nix-env -qaP | grep wget
   environment.systemPackages = with pkgs; [
 
-    kvm qemu libvirt
+    kvm qemu libvirt pciutils seabios
     openssl
-
+    
     htop
     wget sudo gnumake
     gcc
     nodejs
     vim neovim
     vimPlugins.spacevim
-    vimPlugins.vundle
-    iosevka
     
-   haskellPackages.stack
-    haskellPackages.xmonad-contrib
-    haskellPackages.xmonad-extras
-    haskellPackages.xmonad
+    opera
+    firefox-bin
+
+    haskellPackages.stack
 
     xscreensaver
     xclip
-    
+   
+    xfce.xfce4_xkb_plugin
+    xfce.xfce4_whiskermenu_plugin
+    xfce.xfce4_pulseaudio_plugin
+    xfce.xfce4_systemload_plugin
+    xfce.xfce4_netload_plugin
+    xfce.xfce4_pulseaudio_plugin
+    xfce.xfce4_eyes_plugin
+
   ];
-
-  # List services that you want to enable:
-
+  
   hardware = {
+    bluetooth.enable=true;
     pulseaudio.enable=true;
     pulseaudio.support32Bit = true;
+    pulseaudio.extraConfig = ''
+      load-module module-echo-cancel aec_method=webrtc aec_args="analog_gain_control=0 digital_gain_control=1" source_name=echoCancel_source sink_name=echoCancel_sink
+      set-default-source echoCancel_source
+      set-default-sink echoCancel_sink
+    '';
   };
 
-
-  # Enable CUPS to print documents.
-  # services.printing.enable = true;
-
+  boot.extraModprobeConfig = ''
+    options snd-hda-intel vid=8086 pid=8ca0 snoop=0
+  '';
 
   # The NixOS release to be compatible with for stateful data such as databases.
-  system.stateVersion = "16.09";
+  system.stateVersion = "17.09";
 
+  boot.initrd.kernelModules = [ "pci-stub" ];
   boot.initrd.luks.devices = [
     {
       name = "root";
@@ -77,20 +91,25 @@ in {
     }
   ];
 
+  # GPU Passthrough and Windows VM stuff
   virtualisation.libvirtd.enable = true;
-  # GPU PASSTHROUGH NEEDED STUFF
-  #boot.kernelModules = [
-  # "vfio"
-  # "vfio_pci"
-  # "vfio_iommu_type1"
-  #];
+  boot.kernelModules = [
+   "pci-stub"
+   "vfio"
+   "vfio_pci"
+   "vfio_iommu_type1"
+  ];
 
-  #boot.kernelParams = [
-  #  "intel_iommu=on"
-  #  "vfio_iommu_type1.allow_unsafe_interrupts=1"
-  #  "kvm.allow_unsafe_assigned_interrupts=1"
-  #  "kvm.ignore_msrs=1"
-  #];
+  boot.kernelParams = [
+    "pci-stub.ids=10de:100c,10de:0e1a"
+    "intel_iommu=on"
+    "vfio_iommu_type1.allow_unsafe_interrupts=1"
+    "kvm.allow_unsafe_assigned_interrupts=1"
+    "kvm.ignore_msrs=1"
+    "nvidia.NVreg_EnablePCIeGen3=1"
+    "nvidia-drm.modeset=1"
+    "hugepages=4300"
+  ];
 
   boot.loader.grub.device = "/dev/sdb";
 
@@ -101,7 +120,7 @@ in {
     extraGroups = [
      "wheel" "disk" "audio" "video"
      "networkmanager" "systemd-journal"
-     "libvirtd"
+     "libvirtd" 
     ];
     createHome = true;
     uid = 1000;
@@ -113,9 +132,30 @@ in {
   nixpkgs.config.allowUnfree = true;
   hardware.opengl.driSupport32Bit = true;
 
-  #xmonad and slim and nvidia drivers
+
+  networking = {
+    hostName = "Namek";
+    nameservers = ["8.8.8.8" "8.8.4.4"];
+    networkmanager = {
+      enable = true;
+    };
+  };
+
   services = {
+    redshift.enable = true;
+    redshift.latitude = "41.545449";
+    redshift.longitude = "-8.426507";
+
+    keybase.enable = true;
+    kbfs.enable = true;
+
     openssh.enable = true;
+    printing = {
+      enable = true;
+      drivers = [ pkgs.brgenml1cupswrapper ];
+    };
+    avahi.enable=true;
+    mongodb.enable = true;
 
     xserver = {
       enable = true;
@@ -123,17 +163,16 @@ in {
       videoDrivers = [ "nvidia" ];
 
       desktopManager = {
-	kde4.enable = true;
-        default = "kde4";
-      };
-      
-      windowManager = {
-	xmonad.enable = true;
-	xmonad.enableContribAndExtras = true;
+        xfce.enable = true;
+        gnome3.enable = true;
+        plasma5.enable = true;
+        default = "xfce";
       };
 
       displayManager = {
-        lightdm.enable = true;
+        lightdm = {
+          enable = true;
+        };
       };
 
       autorun = true;
@@ -141,27 +180,21 @@ in {
     };
   };
 
+
+  fonts = {
+    enableFontDir = true;
+    enableGhostscriptFonts = true;
+    fonts = with pkgs; [
+        iosevka
+    ];
+  };
+
   programs.zsh = {
     enable = true;
     enableCompletion = true;
     interactiveShellInit = ''
       source ${antigen}/antigen.zsh
-      # Load the oh-my-zsh's library.
-      antigen use oh-my-zsh
-      # Bundles from the default repo (robbyrussell's oh-my-zsh).
-      antigen bundle git
-      antigen bundle git-extras
-      antigen bundle cabal
-      antigen bundle sbt
-      antigen bundle scala
-      # Syntax highlighting bundle.
-      antigen bundle zsh-users/zsh-syntax-highlighting
-      # Load the theme.
-      #antigen theme https://github.com/caiogondim/bullet-train-oh-my-zsh-theme bullet-train
-      antigen theme https://github.com/judgedim/oh-my-zsh-judgedim-theme judgedim
-      #antigen theme https://github.com/vichargrave/mau mau
-      # Tell antigen that you're done.
-      antigen apply     
-   '';
+    '';
   };
+
 }
