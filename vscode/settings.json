@@ -1,0 +1,23 @@
+// Place your settings in this file to overwrite the default settings
+{
+    "editor.fontFamily": "'Input Mono', 'PragmataPro for Powerline', Iosevka, Menlo, Monaco, 'Courier New', monospace",
+    "editor.fontSize": 14,
+    "window.zoomLevel": 1,
+    "terminal.integrated.fontSize": 14,
+    "editor.cursorBlinking": "solid",
+    "workbench.welcome.enabled": false,
+    "vim.disableAnnoyingNeovimMessage": true,
+    "files.exclude": {
+        "**/.stack-work": true
+    },
+    "materialTheme.cache.workbench.settings": {
+        "themeColours": "Darker"
+    },
+    "workbench.iconTheme": "vscode-icons",
+    "editor.wordWrap": "on",
+    "java.errors.incompleteClasspath.severity": "ignore",
+    "latex-workshop.view.pdf.viewer": "tab",
+    "vsicons.dontShowNewVersionMessage": true,
+    "window.nativeTabs": true,
+    "liveshare.featureSet": "insiders"
+}
