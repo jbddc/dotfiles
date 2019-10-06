@@ -1,5 +1,7 @@
 # 👨‍💻 this lad's .dotfiles
 
+The idea of this repo is for me to be able to spin up a new computer with my personal environment by just feeding it my personal info. (not the case atm unfortunately though)
+
 I use nix-home to keep my macOS config files tidy.
 
 I also use nix to configure my home server.
