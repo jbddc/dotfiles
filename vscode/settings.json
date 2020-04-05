@@ -19,5 +19,10 @@
     "latex-workshop.view.pdf.viewer": "tab",
     "vsicons.dontShowNewVersionMessage": true,
     "window.nativeTabs": true,
-    "liveshare.featureSet": "insiders"
+    "liveshare.featureSet": "insiders",
+    "workbench.colorTheme": "Cobalt Next",
+    "terminal.integrated.shell.osx": "/usr/local/bin/fish",
+    "workbench.sideBar.location": "right",
+    "terminal.integrated.inheritEnv": false,
+    "todo-tree.highlights.enabled": true
 }
